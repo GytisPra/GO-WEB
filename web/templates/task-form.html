@@ -1,0 +1,36 @@
+{{ define "title" }}Task form{{ end }} {{ define "content" }}
+<div class="w-full h-full bg-gray-400">
+  <div class="flex p-4">
+    <a href="/" class="group w-min text-nowrap">
+      <span class="group-hover:text-blue-800">GO</span> Home
+    </a>
+  </div>
+  <div class="flex flex-col justify-center items-center">
+    <form id="new-todo" method="Post">
+      <div class="flex flex-col justify-center items-center">
+        <input
+          type="text"
+          class="border-2 rounded px-2 py-1 border-black"
+          name="task-body"
+          value=""
+          placeholder="Tasks to be done"
+        />
+        <button type="submit" class="hover:text-blue-400">Add</button>
+      </div>
+    </form>
+    <div id="todos">
+      {{ if . }} All tasks:
+      <ul>
+        {{ range . }}
+        <li>{{ .Body }}</li>
+        {{ else }}
+        <li>No tasks available</li>
+        {{ end }}
+      </ul>
+      {{ else }}
+      <p>No tasks available</p>
+      {{ end }}
+    </div>
+  </div>
+</div>
+{{ end }}

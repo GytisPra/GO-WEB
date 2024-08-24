@@ -1,0 +1,25 @@
+<!-- layout.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ template "title" . }}</title>
+    <link rel="stylesheet" type="text/css" href="/web/static/css/output.css" />
+  </head>
+  <body>
+    <header class="p-4 flex w-full">
+      <nav>
+        <a href="/">Home</a>
+        <a href="/task">Tasks</a>
+        <!-- Other links -->
+      </nav>
+    </header>
+
+    <main class="h-screen">{{ template "content" . }}</main>
+
+    <footer class="flex w-full justify-center items-center absolute bottom-0">
+      <p>&copy; 2024 MyApp. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
