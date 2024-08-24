@@ -41,11 +41,11 @@ func main() {
 	}
 
 	http.Handle("/web/static/", http.StripPrefix("/web/static/", http.FileServer(http.Dir("web/static"))))
-	http.HandleFunc("/", handlers.HomeHandler)
 
 	taskService := services.NewTaskService(db)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
+	http.HandleFunc("/", handlers.HomeHandler)
 	http.HandleFunc("/task", taskHandler.ShowTasksHandler)
 	http.HandleFunc("/task/create", taskHandler.CreateTaskHandler)
 
