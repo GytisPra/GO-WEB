@@ -4,10 +4,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"web-app/config"
 	"web-app/internal/handlers"
+	"web-app/internal/middleware"
 	"web-app/internal/models"
 	"web-app/internal/services"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
@@ -19,10 +22,11 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	DATABASE_URL := os.Getenv("DATABASE_URL")
-	if DATABASE_URL == "" {
-		log.Fatal("DATABASE_URL is not set in the environment")
+	if err := config.ValidateEnv(); err != nil {
+		log.Fatalf("Environment validation error: %v", err)
 	}
+
+	DATABASE_URL := os.Getenv("DATABASE_URL")
 
 	db, err := gorm.Open(postgres.Open(DATABASE_URL), &gorm.Config{})
 	if err != nil {
@@ -40,15 +44,19 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	http.Handle("/web/static/", http.StripPrefix("/web/static/", http.FileServer(http.Dir("web/static"))))
+	r := mux.NewRouter()
+
+	r.PathPrefix("/web/static/").Handler(http.StripPrefix("/web/static/", http.FileServer(http.Dir("web/static"))))
 
 	taskService := services.NewTaskService(db)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
-	http.HandleFunc("/", handlers.HomeHandler)
-	http.HandleFunc("/task", taskHandler.ShowTasksHandler)
-	http.HandleFunc("/task/create", taskHandler.CreateTaskHandler)
+	r.HandleFunc("/", handlers.HomeHandler)
+	r.HandleFunc("/login", handlers.LoginHandler)
+	r.HandleFunc("/callback", middleware.CallbackHandler)
+	r.HandleFunc("/task", taskHandler.ShowTasksHandler)
+	r.HandleFunc("/task/create", taskHandler.CreateTaskHandler)
 
 	log.Println("Server started on localhost:3000")
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	log.Fatal(http.ListenAndServe(":3000", r))
 }

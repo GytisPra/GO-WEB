@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tailwindcss build -o web/static/css/tailwind.css",
-    "watch": "npx tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --watch"
+    "css-build": "tailwindcss build -o web/static/css/tailwind.css",
+    "css-build-watch": "tailwindcss build -o web/static/css/tailwind.css --watch"
   },
   "keywords": [],
   "author": "",

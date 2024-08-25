@@ -23,5 +23,4 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Error when executing template file: %v", err), http.StatusInternalServerError)
 		return
 	}
-
 }

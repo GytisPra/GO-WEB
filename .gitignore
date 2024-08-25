@@ -4,3 +4,4 @@
 /cmd/go-web/tmp
 /cmd/go-web/main.exe
 /tmp
+/web/static/css

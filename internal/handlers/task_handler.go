@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -45,7 +44,7 @@ func (h *TaskHandler) ShowTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *TaskHandler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		http.Redirect(w, r, "/task", http.StatusSeeOther)
 		return
 	}
 
@@ -61,13 +60,11 @@ func (h *TaskHandler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 
 	requestData.Body = r.FormValue("task-body")
 
-	task, err := h.taskService.CreateTask(requestData.Body)
+	_, err = h.taskService.CreateTask(requestData.Body)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error creating task: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(task)
-
+	http.Redirect(w, r, "/task", http.StatusSeeOther)
 }

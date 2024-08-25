@@ -11,18 +11,23 @@
       href="/web/static/css/tailwind.css"
     />
   </head>
-  <body>
-    <header class="p-4 flex w-full">
-      <nav>
-        <a href="/" class="bg-yellow-900">Home</a>
-        <a href="/task">Tasks</a>
+  <body class="flex flex-col w-screen h-screen">
+    <header class="p-4">
+      <nav class="flex flex-row w-full justify-between">
+        <div>
+          <a href="/">home</a>
+          <a href="/task">Tasks</a>
+        </div>
+        <div>
+          <a href="/login">Login with Discord</a>
+        </div>
         <!-- Other links -->
       </nav>
     </header>
 
-    <main class="h-screen">{{ template "content" . }}</main>
+    <main class="flex h-full">{{ template "content" . }}</main>
 
-    <footer class="flex w-full justify-center items-center absolute bottom-0">
+    <footer class="flex w-full justify-center items-center">
       <p>&copy; 2024 MyApp. All rights reserved.</p>
     </footer>
   </body>
