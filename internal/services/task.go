@@ -3,6 +3,7 @@ package services
 import (
 	"web-app/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -16,14 +17,15 @@ func NewTaskService(db *gorm.DB) *TaskService {
 
 func (s *TaskService) CreateTask(body string) (*models.Task, error) {
 	task := &models.Task{
+		ID:   uuid.New().String(),
 		Body: body,
+		//UserID: "none",
 	}
-	taskID, err := models.CreateTask(s.db, task)
+	err := models.CreateTask(s.db, task)
 	if err != nil {
 		return nil, err
 	}
 
-	task.ID = taskID
 	return task, nil
 }
 

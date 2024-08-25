@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"log"
 	"time"
 
@@ -9,34 +8,23 @@ import (
 )
 
 type User struct {
-	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
-	Username  string    `gorm:"type:text;not null" json:"body"`
-	Password  string    `gorm:"type:text;not null" json:"password"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	ID            string     `gorm:"type:uuid;primaryKey;" json:"id"`
+	Name          *string    `gorm:"uniqueIndex" json:"name"`
+	Email         *string    `gorm:"uniqueIndex" json:"email"`
+	EmailVerified *time.Time `gorm:"uniqueIndex" json:"email_verified"`
+	Image         *string    `gorm:"uniqueIndex" json:"image"`
+	Accounts      []Account  `gorm:"foreignKey:UserID;" json:"accounts"`
+	Sessions      []Session  `gorm:"foreignKey:UserID;" json:"sessions"`
+	Tasks         []Task     `gorm:"foreignKey:UserID;" json:"tasks"`
 }
 
-func (t *User) Validate() error {
-	if t.Username == "" {
-		return errors.New("body cannot be empty")
-	}
-
-	if t.Password == "" {
-		return errors.New("password cannot be empty")
-	}
-	return nil
-}
-
-func CreateUser(db *gorm.DB, user *User) (int64, error) {
-	if err := user.Validate(); err != nil {
-		return 0, err
-	}
+func CreateUser(db *gorm.DB, user *User) error {
 	result := db.Create(&user)
 
 	if result.Error != nil {
 		log.Println("Failed to insert data: ", result.Error)
-		return 0, result.Error
+		return result.Error
 	}
 
-	return user.ID, nil
+	return nil
 }

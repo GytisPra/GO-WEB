@@ -33,6 +33,9 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Account{})
+	db.AutoMigrate(&models.Session{})
 	db.AutoMigrate(&models.Task{})
 
 	sqlDB, err := db.DB()
@@ -51,9 +54,19 @@ func main() {
 	taskService := services.NewTaskService(db)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
+	accountService := services.NewAcountService(db)
+	userSerivce := services.NewUserService(db)
+	sessionService := services.NewSessionService(db)
+
+	go sessionService.CleanupExpiredSessions()
+
+	callbackHandler := middleware.NewCallbackHandler(userSerivce, accountService, sessionService)
+
+	loginHandler := handlers.NewLoginHandler(userSerivce)
+
 	r.HandleFunc("/", handlers.HomeHandler)
-	r.HandleFunc("/login", handlers.LoginHandler)
-	r.HandleFunc("/callback", middleware.CallbackHandler)
+	r.HandleFunc("/login/discord", loginHandler.LoginWithDiscordHandler)
+	r.HandleFunc("/callback/discord", callbackHandler.DiscordCallbackHandler)
 	r.HandleFunc("/task", taskHandler.ShowTasksHandler)
 	r.HandleFunc("/task/create", taskHandler.CreateTaskHandler)
 

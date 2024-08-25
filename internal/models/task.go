@@ -9,8 +9,10 @@ import (
 )
 
 type Task struct {
-	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
-	Body      string    `gorm:"type:text;not null" json:"body"`
+	ID        string    `gorm:"type:uuid;primaryKey;" json:"id"`
+	Body      string    `gorm:"not null" json:"body"`
+	UserID    string    `gorm:"type:uuid;not null;index" json:"user_id"`
+	User      User      `gorm:"foreignKey:UserID" json:"-"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
@@ -22,18 +24,18 @@ func (t *Task) Validate() error {
 	return nil
 }
 
-func CreateTask(db *gorm.DB, task *Task) (int64, error) {
+func CreateTask(db *gorm.DB, task *Task) error {
 	if err := task.Validate(); err != nil {
-		return 0, err
+		return err
 	}
 	result := db.Create(&task)
 
 	if result.Error != nil {
 		log.Println("Failed to insert data: ", result.Error)
-		return 0, result.Error
+		return result.Error
 	}
 
-	return task.ID, nil
+	return nil
 }
 
 func GetAllTasks(db *gorm.DB) ([]Task, error) {
