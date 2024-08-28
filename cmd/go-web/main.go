@@ -19,7 +19,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Println("No .env file found. Using environment variables.")
 	}
 
 	if err := config.ValidateEnv(); err != nil {

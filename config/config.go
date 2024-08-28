@@ -14,7 +14,6 @@ func ValidateEnv() error {
 		"DB_PASSWORD",
 		"DISCORD_CLIENT_ID",
 		"DISCORD_CLIENT_SECRET",
-		// Add other required environment variables here
 	}
 
 	for _, key := range requiredVars {
