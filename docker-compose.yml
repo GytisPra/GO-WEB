@@ -31,5 +31,11 @@ services:
       - "3000:3000"
     image: my-go-app
     container_name: my-go-app
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME:-postgres}
     depends_on:
       - postgres

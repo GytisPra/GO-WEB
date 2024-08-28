@@ -1,5 +1,5 @@
 # Use the official Go image as a base image
-FROM golang:1.23-alpine
+FROM golang:1.21-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 # Download dependencies. Dependencies are cached if the go.mod and go.sum files have not changed
-RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build go mod download
+RUN --mount=type=cache,target=/root/.cache/go-build go mod download
 
 # Copy the source code to the container
 COPY . .
