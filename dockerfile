@@ -10,14 +10,15 @@ COPY go.mod go.sum ./
 # Download dependencies. Dependencies are cached if the go.mod and go.sum files have not changed
 RUN --mount=type=cache,target=/root/.cache/go-build go mod download
 
-# Copy the source code to the container
+# Copy the entire project
 COPY . .
 
 # Build the Go application
-RUN cd ./cmd/go-web && go build -o myapp
+# Adjust the path to where your main.go file is located
+RUN go build -o myapp ./cmd/go-web
 
 # Expose the port on which the app will run
 EXPOSE 3000
 
 # Command to run the application
-CMD ["./cmd/go-web/myapp"]
+CMD ["./myapp"]
