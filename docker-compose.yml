@@ -19,3 +19,17 @@ services:
       - "8080:80"  # Access pgAdmin at http://localhost:8080
     depends_on:
       - postgres
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_CLIENTVAR: "clientvar"
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    image: my-go-app
+    container_name: my-go-app
+    depends_on:
+      - postgres

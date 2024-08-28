@@ -35,6 +35,7 @@ func CreateTask(db *gorm.DB, task *Task) error {
 		return result.Error
 	}
 
+	log.Println("Created new task: %s", task.ID, "By user: ", task.UserID)
 	return nil
 }
 
@@ -47,6 +48,7 @@ func GetAllTasks(db *gorm.DB) ([]Task, error) {
 		return nil, result.Error
 	}
 
+	log.Println("Fetched all tasks")
 	return tasks, nil
 }
 
@@ -59,5 +61,6 @@ func GetUserTasks(userId string, db *gorm.DB) ([]Task, error) {
 		return nil, result.Error
 	}
 
+	log.Println("Fetched all tasks for user: ", userId)
 	return tasks, nil
 }

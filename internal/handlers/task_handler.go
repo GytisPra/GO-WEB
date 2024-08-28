@@ -84,19 +84,12 @@ func (h *TaskHandler) ShowTaskFormHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	allTasks, err := h.taskService.GetUserTasks(user.ID)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error fetching tasks: %v", err), http.StatusInternalServerError)
-		return
-	}
-
 	type ResponseData struct {
-		AllTasks   []models.Task
 		User       models.User
 		IsLoggedIn bool
 	}
 
-	err = tmpl.ExecuteTemplate(w, "layout.html", ResponseData{AllTasks: allTasks, User: *user, IsLoggedIn: isLoggedIn})
+	err = tmpl.ExecuteTemplate(w, "layout.html", ResponseData{User: *user, IsLoggedIn: isLoggedIn})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error executing template: %v", err), http.StatusInternalServerError)
 		return

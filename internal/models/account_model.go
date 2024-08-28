@@ -51,5 +51,7 @@ func CreateAccount(db *gorm.DB, account *Account) error {
 		return result.Error
 	}
 
+	log.Println("Created new account: ", account.ID, "for user: ", account.UserID)
+
 	return nil
 }

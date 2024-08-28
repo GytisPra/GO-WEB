@@ -26,6 +26,7 @@ func CreateUser(db *gorm.DB, user *User) error {
 		return result.Error
 	}
 
+	log.Println("Created new user: ", user.ID)
 	return nil
 }
 
@@ -38,5 +39,7 @@ func GetUserById(db *gorm.DB, id string) (*User, error) {
 		}
 		return nil, err
 	}
+
+	log.Println("Got user by ID: ", user.ID)
 	return &user, nil
 }

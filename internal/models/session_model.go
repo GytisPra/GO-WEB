@@ -24,6 +24,8 @@ func CreateSession(db *gorm.DB, session *Session) error {
 		return result.Error
 	}
 
+	log.Println("Created new session: ", session.ID, "for user: ", session.UserID)
+
 	return nil
 }
 
@@ -46,6 +48,9 @@ func GetSessionByToken(sessionToken string, db *gorm.DB) (*Session, error) {
 		}
 		return nil, err
 	}
+
+	log.Println("Got session: ", session.ID, "for user: ", session.UserID)
+
 	return &session, nil
 }
 
@@ -54,6 +59,8 @@ func RemoveSession(id string, db *gorm.DB) error {
 	if err := db.Where("id = ?", id).Delete(&sesion).Error; err != nil {
 		return err
 	}
+
+	log.Println("Removed session: ", id)
 
 	return nil
 }
