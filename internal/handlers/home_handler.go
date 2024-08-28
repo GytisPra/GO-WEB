@@ -3,10 +3,13 @@ package handlers
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"web-app/internal/models"
 	"web-app/internal/services"
 	"web-app/pkg/utils"
+
+	"gorm.io/gorm"
 )
 
 type HomeHandler struct {
@@ -43,9 +46,13 @@ func (h *HomeHandler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// Cookie found, check if the user is logged in
 		isLoggedIn, user, err = h.sessionService.IsUserLoggedIn(cookie.Value)
-		if err != nil {
-			utils.HandleError(w, fmt.Sprintf("Failed to check if user is logged in: %v", err), http.StatusUnauthorized)
-			return
+
+		if err == gorm.ErrRecordNotFound {
+			log.Println("Failed to check if user is logged in: ", err)
+			user = &models.User{}
+			isLoggedIn = false
+		} else if err != nil {
+			utils.HandleError(w, fmt.Sprintf("Failed to check if user is logged in: %v", err), http.StatusInternalServerError)
 		}
 	}
 

@@ -43,9 +43,6 @@ func GetSessionByToken(sessionToken string, db *gorm.DB) (*Session, error) {
 	var session Session
 
 	if err := db.Where("session_token = ?", sessionToken).First(&session).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
 		return nil, err
 	}
 
