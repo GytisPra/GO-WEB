@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy the Go modules and dependencies files
 COPY go.mod go.sum ./
 
-# Download all Go modules
-RUN go mod download
+# Download dependencies. Dependencies are cached if the go.mod and go.sum files have not changed
+RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build go mod download
 
 # Copy the source code to the container
 COPY . .
