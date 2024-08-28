@@ -25,11 +25,12 @@ func init() {
 	// Check if required environment variables are set
 	clientID := os.Getenv("DISCORD_CLIENT_ID")
 	clientSecret := os.Getenv("DISCORD_CLIENT_SECRET")
+	redirectURL := os.Getenv("DISCORD_REDIRECT_URI")
 
 	OAuth2Config = &oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		RedirectURL:  "http://localhost:3000/callback/discord",
+		RedirectURL:  redirectURL,
 		Scopes:       []string{"identify", "email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
