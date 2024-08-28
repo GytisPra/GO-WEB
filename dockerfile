@@ -17,7 +17,7 @@ COPY . .
 RUN cd ./cmd/go-web && go build -o myapp
 
 # Expose the port on which the app will run
-EXPOSE 8080
+EXPOSE 3000
 
 # Command to run the application
 CMD ["./cmd/go-web/myapp"]
