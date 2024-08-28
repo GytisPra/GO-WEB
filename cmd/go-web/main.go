@@ -75,6 +75,6 @@ func main() {
 	r.HandleFunc("/task/all", taskHandler.ShowTasksHandler)
 	r.HandleFunc("/task/create", taskHandler.CreateTaskHandler)
 
-	log.Println("Server started on localhost:3000")
+	log.Println("✅Server started. Listening on port 3000")
 	log.Fatal(http.ListenAndServe(":3000", r))
 }
