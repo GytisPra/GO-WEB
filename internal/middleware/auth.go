@@ -18,13 +18,17 @@ import (
 var OAuth2Config *oauth2.Config
 
 func init() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found. Using environment variables.")
 	}
 
+	// Check if required environment variables are set
+	clientID := os.Getenv("DISCORD_CLIENT_ID")
+	clientSecret := os.Getenv("DISCORD_CLIENT_SECRET")
+
 	OAuth2Config = &oauth2.Config{
-		ClientID:     os.Getenv("DISCORD_CLIENT_ID"),
-		ClientSecret: os.Getenv("DISCORD_CLIENT_SECRET"),
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		RedirectURL:  "http://localhost:3000/callback/discord",
 		Scopes:       []string{"identify", "email"},
 		Endpoint: oauth2.Endpoint{

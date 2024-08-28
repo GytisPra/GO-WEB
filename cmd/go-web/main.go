@@ -22,6 +22,8 @@ func main() {
 		log.Println("No .env file found. Using environment variables.")
 	}
 
+	log.Println("Starting app..")
+
 	if err := config.ValidateEnv(); err != nil {
 		log.Fatalf("Environment validation error: %v", err)
 	}
