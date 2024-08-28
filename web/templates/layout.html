@@ -9,17 +9,23 @@
       rel="stylesheet"
       type="text/css"
       href="/web/static/css/tailwind.css"
+      href="/web/static/css/global.css"
     />
   </head>
   <body class="flex flex-col w-screen h-screen">
-    <header class="p-4">
-      <nav class="flex flex-row w-full justify-between">
-        <div>
-          <a href="/">home</a>
-          <a href="/task">Tasks</a>
+    <header class="border-b-2 border-white">
+      <nav class="flex p-4 flex-row w-full justify-between">
+        <div class="flex gap-4">
+          <a href="/">Home</a>
+          <a href="/task">Create a Task</a>
+          <a href="/task/all">View tasks</a>
         </div>
         <div>
+          {{ if .IsLoggedIn }}
+          <a href="/logout">Logout</a>
+          {{ else }}
           <a href="/login/discord">Login with Discord</a>
+          {{ end }}
         </div>
         <!-- Other links -->
       </nav>

@@ -1,0 +1,27 @@
+{{ define "title" }}All tasks{{ end }} {{ define "content" }}
+<div class="flex flex-col w-full h-full justify-center items-center" id="todos">
+  {{ if .AllTasks }}
+  <ul>
+    {{ range .AllTasks }}
+    <li>
+      <div class="flex justify-between gap-6">
+        {{ .Body }}
+        <div class="space-x-2">
+          <span class="cursor-pointer text-red-400 hover:text-red-600">
+            Delete
+          </span>
+          <span class="cursor-pointer text-green-400 hover:text-green-600">
+            Edit
+          </span>
+        </div>
+      </div>
+    </li>
+    {{ else }}
+    <li>No tasks available</li>
+    {{ end }}
+  </ul>
+  {{ else }}
+  <p>No tasks available</p>
+  {{ end }}
+</div>
+{{end}}

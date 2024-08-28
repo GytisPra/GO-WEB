@@ -52,22 +52,25 @@ func main() {
 	r.PathPrefix("/web/static/").Handler(http.StripPrefix("/web/static/", http.FileServer(http.Dir("web/static"))))
 
 	taskService := services.NewTaskService(db)
-	taskHandler := handlers.NewTaskHandler(taskService)
-
 	accountService := services.NewAcountService(db)
 	userSerivce := services.NewUserService(db)
 	sessionService := services.NewSessionService(db)
 
+	taskHandler := handlers.NewTaskHandler(taskService, sessionService)
+	callbackHandler := middleware.NewCallbackHandler(userSerivce, accountService, sessionService)
+	homeHandler := handlers.NewHomeHandler(sessionService)
+	logoutHandler := handlers.NewLogoutHandler(sessionService)
+	loginHandler := handlers.NewLoginHandler(sessionService)
+
 	go sessionService.CleanupExpiredSessions()
 
-	callbackHandler := middleware.NewCallbackHandler(userSerivce, accountService, sessionService)
-
-	loginHandler := handlers.NewLoginHandler(userSerivce)
-
-	r.HandleFunc("/", handlers.HomeHandler)
+	r.HandleFunc("/", homeHandler.HomeHandler)
+	r.HandleFunc("/logout", logoutHandler.LogoutHandler)
+	r.HandleFunc("/login", loginHandler.ShowLoginOptionsHandler)
 	r.HandleFunc("/login/discord", loginHandler.LoginWithDiscordHandler)
 	r.HandleFunc("/callback/discord", callbackHandler.DiscordCallbackHandler)
-	r.HandleFunc("/task", taskHandler.ShowTasksHandler)
+	r.HandleFunc("/task", taskHandler.ShowTaskFormHandler)
+	r.HandleFunc("/task/all", taskHandler.ShowTasksHandler)
 	r.HandleFunc("/task/create", taskHandler.CreateTaskHandler)
 
 	log.Println("Server started on localhost:3000")

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-black text-white;
+}
+
+a {
+  @apply hover:text-blue-300;
+}
+
+input,
+textarea {
+  @apply outline-none focus:outline-white/25;
+}
+
+button {
+  @apply outline-none focus:outline-white/25;
+}

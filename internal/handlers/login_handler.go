@@ -1,21 +1,43 @@
 package handlers
 
 import (
+	"fmt"
+	"html/template"
 	"net/http"
 	"web-app/internal/middleware"
 	"web-app/internal/services"
 )
 
 type LoginHandler struct {
-	userService *services.UserService
+	sessionService *services.SessionService
 }
 
-func NewLoginHandler(userService *services.UserService) *LoginHandler {
-	return &LoginHandler{userService: userService}
+func NewLoginHandler(sessionService *services.SessionService) *LoginHandler {
+	return &LoginHandler{sessionService: sessionService}
 }
 
 func (h *LoginHandler) LoginWithDiscordHandler(w http.ResponseWriter, r *http.Request) {
 	url := middleware.OAuth2Config.AuthCodeURL("state")
 
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func (h *LoginHandler) ShowLoginOptionsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("web/templates/login.html")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error parsing template file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.ExecuteTemplate(w, "login.html", nil)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error executing template: %v", err), http.StatusInternalServerError)
+		return
+	}
 }

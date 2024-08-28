@@ -139,17 +139,20 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	var account *models.Account
-	account, err = h.accountService.CreateAccount(user.ID, "oauth", "discord", discordID, &token.RefreshToken, &token.AccessToken, &expiresIn, &tokenType, &scopes, nil, nil, nil)
+	_, err = h.accountService.CreateAccount(user.ID, "oauth", "discord", discordID, &token.RefreshToken, &token.AccessToken, &expiresIn, &tokenType, &scopes, nil, nil, nil)
 	if err != nil {
 		utils.HandleError(w, fmt.Sprintf("Failed to create account: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"user":    user,
-		"account": account,
-		"session": session,
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    session.SessionToken,
+		Expires:  session.Expires,
+		HttpOnly: true,
+		Secure:   true,
+		Path:     "/",
 	})
+
+	http.Redirect(w, r, "/task", http.StatusSeeOther)
 }
