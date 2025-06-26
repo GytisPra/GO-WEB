@@ -1,5 +1,20 @@
 {{ define "title" }}All tasks{{ end }} {{ define "content" }}
 <div class="flex flex-col w-full h-full justify-center items-center" id="todos">
+  <div
+    id="editModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden"
+  >
+    <div class="bg-white p-4 rounded">
+      <h2 class="text-lg mb-2">Edit Task</h2>
+      <input id="editInput" type="text" class="border p-2 w-full" />
+      <div class="mt-4 text-right space-x-2">
+        <button id="cancelEdit" class="bg-gray-300 px-4 py-2">Cancel</button>
+        <button id="saveEdit" class="bg-blue-500 text-white px-4 py-2">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
   {{ if .AllTasks }}
   <ul>
     {{ range .AllTasks }}
@@ -10,7 +25,10 @@
           <span class="cursor-pointer text-red-400 hover:text-red-600">
             Delete
           </span>
-          <span class="cursor-pointer text-green-400 hover:text-green-600">
+          <span
+            class="edit-btn cursor-pointer text-green-400 hover:text-green-600"
+            data-task="{{ .Body }}"
+          >
             Edit
           </span>
         </div>

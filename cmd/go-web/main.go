@@ -97,6 +97,6 @@ func main() {
 	Handle("/task/all", r, taskHandler.ShowTasksHandler, authMiddleware)
 	Handle("/task/create", r, taskHandler.CreateTaskHandler, authMiddleware)
 
-	log.Println("✅Server started. Listening on port 3000")
+	log.Println("✅Server started. Listening on port 3000 (http://localhost:3000/)")
 	log.Fatal(http.ListenAndServe(":3000", r))
 }

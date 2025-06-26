@@ -46,6 +46,7 @@ func (h *TaskHandler) ShowTasksHandler(w http.ResponseWriter, r *http.Request) {
 		AllTasks   []models.Task
 		User       models.User
 		IsLoggedIn bool
+		IsEditing  bool
 	}
 
 	err = tmpl.ExecuteTemplate(w, "layout.html", ResponseData{AllTasks: allTasks, User: *user, IsLoggedIn: true})

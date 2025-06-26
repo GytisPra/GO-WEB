@@ -4,3 +4,9 @@
 ./cmd/go-web/tmp
 ./cmd/go-web/main.exe
 ./tmp
+
+# Ignore compiled JS from TS
+/web/static/js/*.js
+
+# Ignore compiled Tailwind CSS
+/web/static/css/tailwind.css

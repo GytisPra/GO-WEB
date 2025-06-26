@@ -5,12 +5,15 @@
   "main": "index.js",
   "scripts": {
     "css-build": "tailwindcss build -o web/static/css/tailwind.css",
-    "css-build-watch": "npx tailwindcss -i ./web/static/css/global.css -o ./web/static/css/tailwind.css --watch"
+    "css-build-watch": "npx tailwindcss -i ./web/static/css/global.css -o ./web/static/css/tailwind.css --watch",
+    "ts-build": "tsc",
+    "ts-watch": "tsc --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "tailwindcss": "^4.1.10"
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5.8.3"
   }
 }

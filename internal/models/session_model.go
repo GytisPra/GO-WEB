@@ -20,8 +20,7 @@ func CreateSession(db *gorm.DB, session *Session) error {
 	result := db.Create(&session)
 
 	if result.Error != nil {
-		log.Println("Failed to insert data: ", result.Error)
-		return result.Error
+		return fmt.Errorf("failed to insert data: %w", result.Error)
 	}
 
 	log.Println("Created new session: ", session.ID, "for user: ", session.UserID)
@@ -29,11 +28,11 @@ func CreateSession(db *gorm.DB, session *Session) error {
 	return nil
 }
 
-func CleanupExpiredSessions(db *gorm.DB) {
+func CleanupExpiredSessions(db *gorm.DB) error {
 	for {
 		now := time.Now()
 		if err := db.Where("expires < ?", now).Delete(&Session{}).Error; err != nil {
-			fmt.Println("Error deleting expired sessions:", err)
+			return fmt.Errorf("error deleting expired sessions: %w", err)
 		}
 		time.Sleep(1 * time.Hour)
 	}
