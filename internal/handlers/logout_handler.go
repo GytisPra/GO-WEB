@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"time"
+	"web-app/internal/middleware"
 	"web-app/internal/services"
 )
 
@@ -21,8 +22,8 @@ func (h *LogoutHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isLoggedIn, _, err := h.sessionService.IsUserLoggedIn(cookie.Value)
-	if err != nil || !isLoggedIn {
+	_, ok := middleware.FromContext(r.Context())
+	if !ok {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}

@@ -35,7 +35,6 @@ func (h *LoginHandler) ShowLoginOptionsHandler(w http.ResponseWriter, r *http.Re
 	}
 
 	err = tmpl.ExecuteTemplate(w, "login.html", nil)
-
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error executing template: %v", err), http.StatusInternalServerError)
 		return

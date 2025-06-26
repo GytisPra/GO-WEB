@@ -35,7 +35,7 @@ func CreateTask(db *gorm.DB, task *Task) error {
 		return result.Error
 	}
 
-	log.Println("Created new task: %s", task.ID, "By user: ", task.UserID)
+	log.Println("Created new task: ", task.ID, "By user: ", task.UserID)
 	return nil
 }
 

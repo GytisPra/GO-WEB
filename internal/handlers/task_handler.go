@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"web-app/internal/middleware"
 	"web-app/internal/models"
 	"web-app/internal/services"
 )
@@ -23,14 +24,8 @@ func (h *TaskHandler) ShowTasksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	isLoggedIn, user, err := h.sessionService.IsUserLoggedIn(cookie.Value)
-	if err != nil || !isLoggedIn {
+	user, ok := middleware.FromContext(r.Context())
+	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -53,7 +48,7 @@ func (h *TaskHandler) ShowTasksHandler(w http.ResponseWriter, r *http.Request) {
 		IsLoggedIn bool
 	}
 
-	err = tmpl.ExecuteTemplate(w, "layout.html", ResponseData{AllTasks: allTasks, User: *user, IsLoggedIn: isLoggedIn})
+	err = tmpl.ExecuteTemplate(w, "layout.html", ResponseData{AllTasks: allTasks, User: *user, IsLoggedIn: true})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error executing template: %v", err), http.StatusInternalServerError)
 		return
@@ -66,14 +61,8 @@ func (h *TaskHandler) ShowTaskFormHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	isLoggedIn, user, err := h.sessionService.IsUserLoggedIn(cookie.Value)
-	if err != nil || !isLoggedIn {
+	user, ok := middleware.FromContext(r.Context())
+	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -89,7 +78,7 @@ func (h *TaskHandler) ShowTaskFormHandler(w http.ResponseWriter, r *http.Request
 		IsLoggedIn bool
 	}
 
-	err = tmpl.ExecuteTemplate(w, "layout.html", ResponseData{User: *user, IsLoggedIn: isLoggedIn})
+	err = tmpl.ExecuteTemplate(w, "layout.html", ResponseData{User: *user, IsLoggedIn: true})
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error executing template: %v", err), http.StatusInternalServerError)
 		return
@@ -107,29 +96,22 @@ func (h *TaskHandler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		UserID string `json:"user_id"`
 	}
 
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		http.Error(w, "Not logged in", http.StatusUnauthorized)
-		return
-	}
-
-	isLoggedIn, user, err := h.sessionService.IsUserLoggedIn(cookie.Value)
-	if err != nil || !isLoggedIn {
-		http.Error(w, "Not logged in", http.StatusUnauthorized)
+	user, ok := middleware.FromContext(r.Context())
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	requestData.UserID = user.ID
 
-	err = r.ParseForm()
-	if err != nil {
+	if err := r.ParseForm(); err != nil {
 		http.Error(w, fmt.Sprintf("Error parsing form: %v", err), http.StatusBadRequest)
 		return
 	}
 
 	requestData.Body = r.FormValue("task-body")
 
-	_, err = h.taskService.CreateTask(requestData.Body, requestData.UserID)
+	_, err := h.taskService.CreateTask(requestData.Body, requestData.UserID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error creating task: %v", err), http.StatusInternalServerError)
 		return

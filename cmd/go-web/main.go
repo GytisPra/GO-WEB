@@ -17,6 +17,20 @@ import (
 	"gorm.io/gorm"
 )
 
+func Handle(
+	path string,
+	r *mux.Router,
+	handler http.HandlerFunc,
+	middleware ...func(http.Handler) http.Handler,
+) *mux.Route {
+	// Chain middleware manually
+	var h http.Handler = handler
+	for _, m := range middleware {
+		h = m(h)
+	}
+	return r.Handle(path, h)
+}
+
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("No .env file found. Using environment variables.")
@@ -58,6 +72,9 @@ func main() {
 	userSerivce := services.NewUserService(db)
 	sessionService := services.NewSessionService(db)
 
+	authMiddleware := middleware.AuthMiddleware(sessionService)
+	softAuthMiddleware := middleware.SoftAuthMiddleware(sessionService)
+
 	taskHandler := handlers.NewTaskHandler(taskService, sessionService)
 	callbackHandler := middleware.NewCallbackHandler(userSerivce, accountService, sessionService)
 	homeHandler := handlers.NewHomeHandler(sessionService)
@@ -66,14 +83,19 @@ func main() {
 
 	go sessionService.CleanupExpiredSessions()
 
-	r.HandleFunc("/", homeHandler.HomeHandler)
-	r.HandleFunc("/logout", logoutHandler.LogoutHandler)
-	r.HandleFunc("/login", loginHandler.ShowLoginOptionsHandler)
-	r.HandleFunc("/login/discord", loginHandler.LoginWithDiscordHandler)
-	r.HandleFunc("/callback/discord", callbackHandler.DiscordCallbackHandler)
-	r.HandleFunc("/task", taskHandler.ShowTaskFormHandler)
-	r.HandleFunc("/task/all", taskHandler.ShowTasksHandler)
-	r.HandleFunc("/task/create", taskHandler.CreateTaskHandler)
+	// Don't use any auth middelware for these routes
+	Handle("/login", r, loginHandler.ShowLoginOptionsHandler)
+	Handle("/login/discord", r, loginHandler.LoginWithDiscordHandler)
+	Handle("/callback/discord", r, callbackHandler.DiscordCallbackHandler)
+
+	// Use a softAuthMiddleware for these routes so that we can check if the user is logged in (accesible to public)
+	Handle("/", r, homeHandler.HomeHandler, softAuthMiddleware)
+
+	// Protected routes only accesible when logged in
+	Handle("/logout", r, logoutHandler.LogoutHandler, authMiddleware)
+	Handle("/task", r, taskHandler.ShowTaskFormHandler, authMiddleware)
+	Handle("/task/all", r, taskHandler.ShowTasksHandler, authMiddleware)
+	Handle("/task/create", r, taskHandler.CreateTaskHandler, authMiddleware)
 
 	log.Println("✅Server started. Listening on port 3000")
 	log.Fatal(http.ListenAndServe(":3000", r))
