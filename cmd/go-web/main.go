@@ -4,11 +4,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 	"web-app/config"
-	"web-app/internal/handlers"
+	"web-app/internal/handlers/auth"
+	"web-app/internal/handlers/home"
+	"web-app/internal/handlers/task"
 	"web-app/internal/middleware"
 	"web-app/internal/models"
 	"web-app/internal/services"
+	"web-app/pkg/utils"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -63,9 +67,11 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	utils.BuildTime = time.Now().Unix()
+
 	r := mux.NewRouter()
 
-	r.PathPrefix("/web/static/").Handler(http.StripPrefix("/web/static/", http.FileServer(http.Dir("web/static"))))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 
 	taskService := services.NewTaskService(db)
 	accountService := services.NewAcountService(db)
@@ -75,11 +81,13 @@ func main() {
 	authMiddleware := middleware.AuthMiddleware(sessionService)
 	softAuthMiddleware := middleware.SoftAuthMiddleware(sessionService)
 
-	taskHandler := handlers.NewTaskHandler(taskService, sessionService)
-	callbackHandler := middleware.NewCallbackHandler(userSerivce, accountService, sessionService)
-	homeHandler := handlers.NewHomeHandler(sessionService)
-	logoutHandler := handlers.NewLogoutHandler(sessionService)
-	loginHandler := handlers.NewLoginHandler(sessionService)
+	callbackHandler := auth.NewCallbackHandler(userSerivce, accountService, sessionService)
+	logoutHandler := auth.NewLogoutHandler(sessionService)
+	loginHandler := auth.NewLoginHandler(sessionService)
+
+	taskHandler := task.NewTaskHandler(taskService, sessionService)
+
+	homeHandler := home.NewHomeHandler(sessionService)
 
 	go sessionService.CleanupExpiredSessions()
 
@@ -93,9 +101,11 @@ func main() {
 
 	// Protected routes only accesible when logged in
 	Handle("/logout", r, logoutHandler.LogoutHandler, authMiddleware)
-	Handle("/task", r, taskHandler.ShowTaskFormHandler, authMiddleware)
-	Handle("/task/all", r, taskHandler.ShowTasksHandler, authMiddleware)
-	Handle("/task/create", r, taskHandler.CreateTaskHandler, authMiddleware)
+	Handle("/tasks/create-new", r, taskHandler.ShowTaskFormHandler, authMiddleware)
+	Handle("/tasks/all", r, taskHandler.ShowTasksHandler, authMiddleware)
+	Handle("/tasks/create", r, taskHandler.CreateTaskHandler, authMiddleware)
+	Handle("/tasks/update", r, taskHandler.UpdateTaskHandler, authMiddleware)
+	Handle("/tasks/delete", r, taskHandler.DeleteTaskHandler, authMiddleware)
 
 	log.Println("✅Server started. Listening on port 3000 (http://localhost:3000/)")
 	log.Fatal(http.ListenAndServe(":3000", r))

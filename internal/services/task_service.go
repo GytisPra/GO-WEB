@@ -50,3 +50,32 @@ func (s *TaskService) GetUserTasks(userId string) ([]models.Task, error) {
 
 	return tasks, nil
 }
+
+func (s *TaskService) GetTaskById(taskId string) (*models.Task, error) {
+	var task *models.Task
+
+	task, err := models.GetTaskById(taskId, s.db)
+	if err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
+func (s *TaskService) UpdateTask(userId string, taskId string, newTaskBody string) error {
+	err := models.UpdateTask(userId, taskId, newTaskBody, s.db)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *TaskService) DeleteTask(ID string) error {
+	err := models.DeleteTask(ID, s.db)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

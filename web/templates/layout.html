@@ -8,17 +8,18 @@
     <link
       rel="stylesheet"
       type="text/css"
-      href="/web/static/css/tailwind.css"
-      href="/web/static/css/global.css"
+      href="/static/css/tailwind.css?v={{ .BuildTime }}"
+      href="/static/css/global.css?v={{ .BuildTime }}"
     />
+    <script src="/static/js/bundle.js?v={{ .BuildTime }}" defer></script>
   </head>
   <body class="flex flex-col w-screen h-screen">
     <header class="border-b-2">
       <nav class="flex p-4 flex-row w-full justify-between">
         <div class="flex gap-4">
           <a href="/">Home</a>
-          <a href="/task">Create a Task</a>
-          <a href="/task/all">View tasks</a>
+          <a href="/tasks/create-new">Create a Task</a>
+          <a href="/tasks/all">View tasks</a>
         </div>
         <div>
           {{ if .IsLoggedIn }}

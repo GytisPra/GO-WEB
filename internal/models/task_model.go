@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -63,4 +64,36 @@ func GetUserTasks(userId string, db *gorm.DB) ([]Task, error) {
 
 	log.Println("Fetched all tasks for user: ", userId)
 	return tasks, nil
+}
+
+func GetTaskById(taskId string, db *gorm.DB) (*Task, error) {
+	var task *Task
+
+	result := db.Where("id = ?", taskId).Find(&task)
+	if result.Error != nil {
+		log.Println("Failed to find task: ", result.Error)
+		return nil, result.Error
+	}
+
+	return task, nil
+}
+
+func UpdateTask(userId string, taskId string, newTaskBody string, db *gorm.DB) error {
+	result := db.Model(&Task{}).
+		Where("id = ? AND user_id = ?", taskId, userId).
+		Update("body", newTaskBody)
+	if result.Error != nil {
+		log.Println("Failed to update task: ", result.Error)
+		return result.Error
+	}
+
+	return nil
+}
+
+func DeleteTask(ID string, db *gorm.DB) error {
+	if err := db.Where("id = ?", ID).Delete(&Task{}).Error; err != nil {
+		return fmt.Errorf("error deleting task: %w", err)
+	}
+
+	return nil
 }

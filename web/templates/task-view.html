@@ -4,9 +4,23 @@
     id="editModal"
     class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden"
   >
-    <div class="bg-white p-4 rounded">
-      <h2 class="text-lg mb-2">Edit Task</h2>
-      <input id="editInput" type="text" class="border p-2 w-full" />
+    <div class="bg-gray-900 p-4 rounded">
+      <h2 class="text-lg mb-2 text-center">Edit Task</h2>
+      <span id="editErrorMsg" class="text-red-400 hidden"> </span>
+      <div class="col-span-full">
+        <label for="taskBody" class="block text-sm/6 font-medium">
+          Task name
+        </label>
+        <div class="mt-2">
+          <input
+            type="text"
+            name="taskBody"
+            id="taskBody"
+            autocomplete="taskBody"
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          />
+        </div>
+      </div>
       <div class="mt-4 text-right space-x-2">
         <button id="cancelEdit" class="bg-gray-300 px-4 py-2">Cancel</button>
         <button id="saveEdit" class="bg-blue-500 text-white px-4 py-2">
@@ -15,31 +29,55 @@
       </div>
     </div>
   </div>
-  {{ if .AllTasks }}
-  <ul>
+  <div
+    id="deleteModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden"
+  >
+    <div class="bg-gray-900 p-4 rounded">
+      <h2 class="text-lg mb-2 text-center">Delete Task</h2>
+      <span id="editErrorMsg" class="text-red-400 hidden"> </span>
+      <div class="col-span-full">
+        <span class="block text-sm/6 font-medium">
+          Are you sure you want to delete
+          <span id="taskBody-delete" class="font-bold"></span>
+        </span>
+      </div>
+      <div class="mt-4 flex justify-center items-center space-x-2">
+        <button id="cancelDelete" class="bg-gray-600 px-4 py-2">Cancel</button>
+        <button id="confirmDelete" class="bg-red-500 text-white px-4 py-2">
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+  {{ with .Data }} {{ if .AllTasks }}
+  <ul id="allTasks">
     {{ range .AllTasks }}
-    <li>
+    <li id="{{ .ID }}_taskli" key="{{ .ID }}">
       <div class="flex justify-between gap-6">
-        {{ .Body }}
+        <span id="{{ .ID }}_taskBody">{{ .Body }}</span>
         <div class="space-x-2">
-          <span class="cursor-pointer text-red-400 hover:text-red-600">
-            Delete
-          </span>
+          <span
+            class="delete-btn cursor-pointer text-red-400 hover:text-red-600"
+            data-task="{{ .Body }}"
+            data-id="{{ .ID }}"
+            >Delete</span
+          >
           <span
             class="edit-btn cursor-pointer text-green-400 hover:text-green-600"
             data-task="{{ .Body }}"
+            data-id="{{ .ID }}"
+            >Edit</span
           >
-            Edit
-          </span>
         </div>
       </div>
     </li>
-    {{ else }}
-    <li>No tasks available</li>
     {{ end }}
   </ul>
   {{ else }}
   <p>No tasks available</p>
+  {{ end }} {{ else }}
+  <p>No tasks available</p>
   {{ end }}
 </div>
-{{end}}
+{{ end }}

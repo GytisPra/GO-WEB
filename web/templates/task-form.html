@@ -1,7 +1,7 @@
 {{ define "title" }}Task form{{ end }} {{ define "content" }}
 <div class="w-full h-full flex justify-center items-center">
   <div class="flex flex-col justify-center items-center">
-    <form id="new-todo" method="Post" action="/task/create">
+    <form id="new-todo" method="Post" action="/tasks/create">
       <div class="flex flex-col justify-center items-center">
         <input
           type="text"
@@ -13,7 +13,7 @@
         <button type="submit" class="hover:text-blue-400">Add</button>
       </div>
     </form>
-    <a href="/task/all"> View your tasks </a>
+    <a href="/tasks/all"> View your tasks </a>
   </div>
 </div>
 {{ end }}
