@@ -9,6 +9,7 @@ import { taskState } from "./state";
   const confirmDelete = document.getElementById(
     "confirmDelete"
   ) as HTMLButtonElement;
+  const allTasks = document.getElementById("allTasks") as HTMLUListElement;
 
   // Attach click event to all delete buttons
   document.querySelectorAll(".delete-btn").forEach((btn) => {
@@ -22,13 +23,14 @@ import { taskState } from "./state";
         "taskBody-delete"
       ) as HTMLSpanElement;
 
+      const remainingTasks =
+        allTasks.querySelectorAll("li:not(.hidden)").length;
+
       if (taskState.currentTaskBody || taskState.currentTaskBody === "") {
         taskBody.innerText = taskState.currentTaskBody;
       } else {
         taskBody.innerText = "NOT_FOUND";
       }
-
-      console.log("Delete button pressed!");
 
       deleteModal.classList.remove("hidden");
     });
@@ -59,6 +61,16 @@ import { taskState } from "./state";
         ) as HTMLLIElement;
 
         deletedTask.classList.add("hidden");
+
+        const remainingTasks =
+          allTasks.querySelectorAll("li:not(.hidden)").length;
+
+        if (remainingTasks == 0) {
+          const allTasksDeleteP = document.getElementById(
+            "allTasksDeleted"
+          ) as HTMLParagraphElement;
+          allTasksDeleteP.classList.remove("hidden");
+        }
       }
     } catch (err) {
       console.error("failed to delete task:", err);

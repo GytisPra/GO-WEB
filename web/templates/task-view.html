@@ -51,7 +51,7 @@
     </div>
   </div>
   {{ with .Data }} {{ if .AllTasks }}
-  <ul id="allTasks">
+  <ul id="allTasks" data-numberOfTasks="{{ len .AllTasks }}">
     {{ range .AllTasks }}
     <li id="{{ .ID }}_taskli" key="{{ .ID }}">
       <div class="flex justify-between gap-6">
@@ -74,6 +74,7 @@
     </li>
     {{ end }}
   </ul>
+  <p id="allTasksDeleted" class="hidden">No tasks available</p>
   {{ else }}
   <p>No tasks available</p>
   {{ end }} {{ else }}

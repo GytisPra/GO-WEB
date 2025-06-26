@@ -27,17 +27,15 @@ Run the following commands to build the project:
 pnpm build
 ```
 
-Compiles and bundles your TypeScript/JavaScript files into `static/js/`.
+Compiles and bundles your TypeScript/JavaScript files into `web/static/js/`.
 
 ---
 
-### Build CSS (e.g., Tailwind CSS)
+### Build CSS
 
 ```bash
 pnpm css-build
 ```
-
-Generates your CSS output files, typically from a Tailwind config or PostCSS pipeline.
 
 ---
 
