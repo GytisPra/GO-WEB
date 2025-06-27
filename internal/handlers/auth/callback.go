@@ -41,11 +41,11 @@ func init() {
 
 type CallbackHandler struct {
 	userSerivce    *services.UserService
-	accountService *services.AcountService
+	accountService *services.AccountService
 	sessionService *services.SessionService
 }
 
-func NewCallbackHandler(userSerivce *services.UserService, accountService *services.AcountService, sessionService *services.SessionService) *CallbackHandler {
+func NewCallbackHandler(userSerivce *services.UserService, accountService *services.AccountService, sessionService *services.SessionService) *CallbackHandler {
 	return &CallbackHandler{userSerivce: userSerivce, accountService: accountService, sessionService: sessionService}
 }
 
@@ -59,6 +59,7 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 	// Exchange code for token
 	token, err := OAuth2Config.Exchange(r.Context(), code)
 	if err != nil {
+		log.Printf("Token exchange error: %v", err)
 		utils.HandleError(w, fmt.Sprintf("Failed to exchange token: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -67,12 +68,14 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 	client := OAuth2Config.Client(r.Context(), token)
 	resp, err := client.Get("https://discord.com/api/v10/users/@me")
 	if err != nil {
+		log.Printf("Error while getting user info: %v", err)
 		utils.HandleError(w, fmt.Sprintf("Failed to get user info: %v", err), http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("Error while getting user info: %v", err)
 		utils.HandleError(w, "Failed to get user info", http.StatusInternalServerError)
 		return
 	}
@@ -80,12 +83,14 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 	// Read and parse the user info response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("Error while reading response body: %v", err)
 		utils.HandleError(w, fmt.Sprintf("Failed to read response body: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	var discordUser map[string]any
 	if err := json.Unmarshal(body, &discordUser); err != nil {
+		log.Printf("User info parsing error: %v", err)
 		utils.HandleError(w, fmt.Sprintf("Failed to parse user info: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -93,18 +98,21 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 	// discordID := discordUser["id"].(string)
 	discordID, ok := discordUser["id"].(string)
 	if !ok || discordID == "" {
+		log.Printf("Error retrieving discord ID: %v", err)
 		utils.HandleError(w, "Failed to retrieve Discord ID", http.StatusInternalServerError)
 		return
 	}
 
 	username, ok := discordUser["username"].(string)
 	if !ok || username == "" {
+		log.Printf("Error retrieving discord username: %v", err)
 		utils.HandleError(w, "Failed to retrieve username", http.StatusInternalServerError)
 		return
 	}
 
 	email, ok := discordUser["email"].(string)
 	if !ok || email == "" {
+		log.Printf("Error retrieving discord email: %v", err)
 		utils.HandleError(w, "Failed to retrieve email", http.StatusInternalServerError)
 		return
 	}
@@ -112,6 +120,7 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 	var user *models.User
 	user, err = h.userSerivce.CreateUser(username, email)
 	if err != nil {
+		log.Printf("User creation error: %v", err)
 		utils.HandleError(w, fmt.Sprintf("Failed to create user: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -121,12 +130,14 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 	var session *models.Session
 	session, err = h.sessionService.CreateSession(user.ID)
 	if err != nil {
+		log.Printf("Session creation error: %v", err)
 		utils.HandleError(w, fmt.Sprintf("Failed to create session: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	scopes, ok := token.Extra("scope").(string)
 	if !ok || scopes == "" {
+		log.Printf("Scope retrieval error: %v", err)
 		utils.HandleError(w, "Failed to retrieve 'scopes' from token", http.StatusInternalServerError)
 		return
 	}
@@ -158,5 +169,5 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 		Path:     "/",
 	})
 
-	http.Redirect(w, r, "/task", http.StatusSeeOther)
+	http.Redirect(w, r, "/tasks/all", http.StatusSeeOther)
 }

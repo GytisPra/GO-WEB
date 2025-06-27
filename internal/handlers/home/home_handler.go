@@ -15,15 +15,14 @@ func NewHomeHandler(sessionService *services.SessionService) *HomeHandler {
 	return &HomeHandler{sessionService: sessionService}
 }
 
-func (h *HomeHandler) HomeHandler(w http.ResponseWriter, r *http.Request) {
-	user, loggedIn := middleware.FromContext(r.Context())
+func (h *HomeHandler) ShowHome(w http.ResponseWriter, r *http.Request) {
+	_, ok := middleware.FromContext(r.Context())
 
 	pageData := struct{}{}
 
 	tmplData := utils.TemplateData{
 		BuildTime:  utils.BuildTime,
-		IsLoggedIn: loggedIn,
-		User:       user,
+		IsLoggedIn: ok,
 		Data:       pageData,
 	}
 

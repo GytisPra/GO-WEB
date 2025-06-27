@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"web-app/internal/middleware"
 	"web-app/internal/models"
 	"web-app/internal/services"
@@ -19,19 +20,19 @@ func NewTaskHandler(taskService *services.TaskService, sessionService *services.
 	return &TaskHandler{taskService: taskService, sessionService: sessionService}
 }
 
-func (h *TaskHandler) ShowTasksHandler(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) ShowAllTasks(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	user, ok := middleware.FromContext(r.Context())
+	userID, ok := middleware.FromContext(r.Context())
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	allTasks, err := h.taskService.GetUserTasks(user.ID)
+	allTasks, err := h.taskService.GetUserTasks(userID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error fetching tasks: %v", err), http.StatusInternalServerError)
 		return
@@ -44,20 +45,19 @@ func (h *TaskHandler) ShowTasksHandler(w http.ResponseWriter, r *http.Request) {
 	tmplData := utils.TemplateData{
 		BuildTime:  utils.BuildTime,
 		IsLoggedIn: true,
-		User:       user,
 		Data:       pageData,
 	}
 
 	utils.RenderTemplate(w, "task-view.html", tmplData)
 }
 
-func (h *TaskHandler) ShowTaskFormHandler(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) ShowCreateTaskForm(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	user, ok := middleware.FromContext(r.Context())
+	_, ok := middleware.FromContext(r.Context())
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -68,14 +68,13 @@ func (h *TaskHandler) ShowTaskFormHandler(w http.ResponseWriter, r *http.Request
 	tmplData := utils.TemplateData{
 		BuildTime:  utils.BuildTime,
 		IsLoggedIn: true,
-		User:       user,
 		Data:       pageData,
 	}
 
 	utils.RenderTemplate(w, "task-form.html", tmplData)
 }
 
-func (h *TaskHandler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/task", http.StatusSeeOther)
 		return
@@ -86,13 +85,13 @@ func (h *TaskHandler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		UserID string `json:"user_id"`
 	}
 
-	user, ok := middleware.FromContext(r.Context())
+	userID, ok := middleware.FromContext(r.Context())
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	requestData.UserID = user.ID
+	requestData.UserID = userID
 
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, fmt.Sprintf("Error parsing form: %v", err), http.StatusBadRequest)
@@ -101,22 +100,24 @@ func (h *TaskHandler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 
 	requestData.Body = r.FormValue("task-body")
 
-	_, err := h.taskService.CreateTask(requestData.Body, requestData.UserID)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error creating task: %v", err), http.StatusInternalServerError)
-		return
+	for i := 0; i < 100; i++ {
+		_, err := h.taskService.CreateTask(requestData.Body+strconv.Itoa(i), requestData.UserID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error creating task: %v", err), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	http.Redirect(w, r, "/tasks/all", http.StatusSeeOther)
 }
 
-func (h *TaskHandler) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	user, ok := middleware.FromContext(r.Context())
+	userID, ok := middleware.FromContext(r.Context())
 	if !ok {
 		utils.HandleError(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -138,12 +139,12 @@ func (h *TaskHandler) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if task.UserID != user.ID {
+	if task.UserID != userID {
 		utils.HandleError(w, "Forbidden: You can only edit your own tasks", http.StatusForbidden)
 		return
 	}
 
-	err = h.taskService.UpdateTask(user.ID, requestData.ID, requestData.Body)
+	err = h.taskService.UpdateTask(userID, requestData.ID, requestData.Body)
 	if err != nil {
 		utils.HandleError(w, "Failed to update task", http.StatusInternalServerError)
 		return
@@ -152,13 +153,13 @@ func (h *TaskHandler) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+func (h *TaskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	user, ok := middleware.FromContext(r.Context())
+	userID, ok := middleware.FromContext(r.Context())
 	if !ok {
 		utils.HandleError(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -179,7 +180,7 @@ func (h *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if task.UserID != user.ID {
+	if task.UserID != userID {
 		utils.HandleError(w, "Forbidden: You can only delete your own tasks", http.StatusForbidden)
 		return
 	}

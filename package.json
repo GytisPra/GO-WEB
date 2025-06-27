@@ -1,20 +1,26 @@
 {
-  "name": "GO-WEB",
+  "name": "go-web",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "css-build": "tailwindcss build -o web/static/css/tailwind.css",
-    "css-build-watch": "npx tailwindcss -i ./web/static/css/global.css -o ./web/static/css/tailwind.css --watch",
-    "build": "esbuild web/ts/main.ts --bundle --outfile=web/static/js/bundle.js --minify",
-    "watch": "esbuild web/ts/main.ts --bundle --outfile=web/static/js/bundle.js --watch"
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "css:build": "npx tailwindcss -i ./web/static/css/global.css -o ./web/static/css/tailwind.css --minify",
+    "css:watch": "npx tailwindcss -i ./web/static/css/global.css -o ./web/static/css/tailwind.css --watch",
+    "ts:build": "esbuild web/ts/main.ts --bundle --outfile=web/static/js/bundle.js --minify",
+    "ts:watch": "esbuild web/ts/main.ts --bundle --outfile=web/static/js/bundle.js --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.5",
-    "tailwindcss": "^4.1.10",
-    "typescript": "^5.8.3"
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0"
   }
 }

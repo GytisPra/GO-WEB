@@ -7,15 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type AcountService struct {
+type AccountService struct {
 	db *gorm.DB
 }
 
-func NewAcountService(db *gorm.DB) *AcountService {
-	return &AcountService{db: db}
+func NewAccountService(db *gorm.DB) *AccountService {
+	return &AccountService{db: db}
 }
 
-func (s *AcountService) CreateAccount(userID string,
+func (s *AccountService) CreateAccount(userID string,
 	authType string,
 	provider string,
 	providerAccountId string,

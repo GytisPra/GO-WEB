@@ -15,7 +15,7 @@ func NewLogoutHandler(sessionService *services.SessionService) *LogoutHandler {
 	return &LogoutHandler{sessionService: sessionService}
 }
 
-func (h *LogoutHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (h *LogoutHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		http.Redirect(w, r, "/", http.StatusSeeOther)

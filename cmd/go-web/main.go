@@ -1,5 +1,7 @@
 package main
 
+// TODO: add my own login (email+password)
+
 import (
 	"log"
 	"net/http"
@@ -74,7 +76,7 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 
 	taskService := services.NewTaskService(db)
-	accountService := services.NewAcountService(db)
+	accountService := services.NewAccountService(db)
 	userSerivce := services.NewUserService(db)
 	sessionService := services.NewSessionService(db)
 
@@ -92,20 +94,20 @@ func main() {
 	go sessionService.CleanupExpiredSessions()
 
 	// Don't use any auth middelware for these routes
-	Handle("/login", r, loginHandler.ShowLoginOptionsHandler)
-	Handle("/login/discord", r, loginHandler.LoginWithDiscordHandler)
+	Handle("/login", r, loginHandler.ShowLoginOptions)
+	Handle("/login/discord", r, loginHandler.LoginWithDiscord)
 	Handle("/callback/discord", r, callbackHandler.DiscordCallbackHandler)
 
 	// Use a softAuthMiddleware for these routes so that we can check if the user is logged in (accesible to public)
-	Handle("/", r, homeHandler.HomeHandler, softAuthMiddleware)
+	Handle("/", r, homeHandler.ShowHome, softAuthMiddleware)
 
 	// Protected routes only accesible when logged in
-	Handle("/logout", r, logoutHandler.LogoutHandler, authMiddleware)
-	Handle("/tasks/create-new", r, taskHandler.ShowTaskFormHandler, authMiddleware)
-	Handle("/tasks/all", r, taskHandler.ShowTasksHandler, authMiddleware)
-	Handle("/tasks/create", r, taskHandler.CreateTaskHandler, authMiddleware)
-	Handle("/tasks/update", r, taskHandler.UpdateTaskHandler, authMiddleware)
-	Handle("/tasks/delete", r, taskHandler.DeleteTaskHandler, authMiddleware)
+	Handle("/logout", r, logoutHandler.Logout, authMiddleware)
+	Handle("/tasks/create-new", r, taskHandler.ShowCreateTaskForm, authMiddleware)
+	Handle("/tasks/all", r, taskHandler.ShowAllTasks, authMiddleware)
+	Handle("/tasks/create", r, taskHandler.CreateTask, authMiddleware)
+	Handle("/tasks/update", r, taskHandler.UpdateTask, authMiddleware)
+	Handle("/tasks/delete", r, taskHandler.DeleteTask, authMiddleware)
 
 	log.Println("✅Server started. Listening on port 3000 (http://localhost:3000/)")
 	log.Fatal(http.ListenAndServe(":3000", r))

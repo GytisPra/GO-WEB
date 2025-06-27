@@ -1,6 +1,9 @@
 package services
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
 	"time"
 	"web-app/internal/models"
 
@@ -23,14 +26,17 @@ func (s *SessionService) CreateSession(userID string) (*models.Session, error) {
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
+			token, err := generateSessionToken()
+			if err != nil {
+				return nil, fmt.Errorf("failed to generate session token: %w", err)
+			}
 			session := &models.Session{
 				ID:           uuid.New().String(),
-				SessionToken: uuid.New().String(),
+				SessionToken: token,
 				Expires:      time.Now().Add(24 * time.Hour),
 				UserID:       userID,
 			}
-			err := models.CreateSession(s.db, session)
-			if err != nil {
+			if err := models.CreateSession(s.db, session); err != nil {
 				return nil, err
 			}
 			return session, nil
@@ -45,8 +51,17 @@ func (s *SessionService) CleanupExpiredSessions() {
 	go models.CleanupExpiredSessions(s.db)
 }
 
-func (s *SessionService) IsUserLoggedIn(sessionToken string) (bool, *models.User, error) {
+func (s *SessionService) GetSessionByToken(sessionToken string) (*models.Session, error) {
 	session, err := models.GetSessionByToken(sessionToken, s.db)
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}
+
+func (s *SessionService) IsUserLoggedIn(sessionToken string) (bool, *models.User, error) {
+	session, err := s.GetSessionByToken(sessionToken)
 	if err != nil {
 		return false, nil, err
 	}
@@ -74,4 +89,12 @@ func (s *SessionService) LogUserOut(sessionToken string) error {
 	}
 
 	return nil
+}
+
+func generateSessionToken() (string, error) {
+	bytes := make([]byte, 32) // 256 bits
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
 }

@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"net/http"
 	"web-app/internal/middleware"
-	"web-app/internal/models"
 )
 
 var BuildTime int64
@@ -13,22 +12,19 @@ var BuildTime int64
 type BaseTemplateData struct {
 	BuildTime  int64
 	IsLoggedIn bool
-	User       *models.User
 }
 
 type TemplateData struct {
 	BuildTime  int64
 	IsLoggedIn bool
-	User       *models.User
 	Data       any
 }
 
 func BuildTemplateData(ctx context.Context, pageData any) TemplateData {
-	user, ok := middleware.FromContext(ctx)
+	_, ok := middleware.FromContext(ctx)
 	return TemplateData{
 		BuildTime:  BuildTime,
 		IsLoggedIn: ok,
-		User:       user,
 		Data:       pageData,
 	}
 }

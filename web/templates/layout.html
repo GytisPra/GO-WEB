@@ -9,11 +9,10 @@
       rel="stylesheet"
       type="text/css"
       href="/static/css/tailwind.css?v={{ .BuildTime }}"
-      href="/static/css/global.css?v={{ .BuildTime }}"
     />
     <script src="/static/js/bundle.js?v={{ .BuildTime }}" defer></script>
   </head>
-  <body class="flex flex-col w-screen h-screen">
+  <body class="flex flex-col">
     <header class="border-b-2">
       <nav class="flex p-4 flex-row w-full justify-between">
         <div class="flex gap-4">
@@ -25,17 +24,13 @@
           {{ if .IsLoggedIn }}
           <a href="/logout">Logout</a>
           {{ else }}
-          <a href="/login/discord">Login with Discord</a>
+          <a href="/login">Login</a>
           {{ end }}
         </div>
         <!-- Other links -->
       </nav>
     </header>
 
-    <main class="flex h-full">{{ template "content" . }}</main>
-
-    <footer class="flex w-full justify-center items-center">
-      <p>&copy; 2024 MyApp. All rights reserved.</p>
-    </footer>
+    <main class="mt-10 flex h-full">{{ template "content" . }}</main>
   </body>
 </html>
