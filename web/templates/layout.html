@@ -1,5 +1,5 @@
 <!-- layout.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -8,13 +8,14 @@
     <link
       rel="stylesheet"
       type="text/css"
-      href="/static/css/tailwind.css?v={{ .BuildTime }}"
+      href="/static/css/main.css?v={{ .BuildTime }}"
     />
-    <script src="/static/js/bundle.js?v={{ .BuildTime }}" defer></script>
+    <script src="/static/js/main.js?v={{ .BuildTime }}" defer></script>
   </head>
-  <body class="flex flex-col">
+  <body class="flex h-screen w-screen flex-col" data-page="{{ .Page }}">
+    {{ if .ShowHeader }}
     <header class="border-b-2">
-      <nav class="flex p-4 flex-row w-full justify-between">
+      <nav class="flex w-full flex-row justify-between p-4">
         <div class="flex gap-4">
           <a href="/">Home</a>
           <a href="/tasks/create-new">Create a Task</a>
@@ -30,7 +31,8 @@
         <!-- Other links -->
       </nav>
     </header>
+    {{ end }}
 
-    <main class="mt-10 flex h-full">{{ template "content" . }}</main>
+    <main class="h-full w-full">{{ template "content" . }}</main>
   </body>
 </html>

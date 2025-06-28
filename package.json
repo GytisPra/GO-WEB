@@ -5,8 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "vite build --watch",
+    "dev": "concurrently -k -n AIR,VITE -c magenta,cyan \"air\" \"vite build --watch\"",
     "build": "vite build",
+    "watch-templates": "node scripts/watch-templates.js",
     "css:build": "npx tailwindcss -i ./web/static/css/global.css -o ./web/static/css/tailwind.css --minify",
     "css:watch": "npx tailwindcss -i ./web/static/css/global.css -o ./web/static/css/tailwind.css --watch",
     "ts:build": "esbuild web/ts/main.ts --bundle --outfile=web/static/js/bundle.js --minify",
@@ -16,10 +17,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
+    "@tailwindcss/postcss": "^4.1.11",
+    "chokidar": "^4.0.3",
+    "concurrently": "^9.2.0",
     "esbuild": "^0.25.5",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.11",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.13",
     "typescript": "^5.8.3",
     "vite": "^7.0.0"
   }

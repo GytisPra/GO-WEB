@@ -9,4 +9,4 @@
 /web/static/js/*.js
 
 # Ignore compiled Tailwind CSS
-/web/static/css/tailwind.css
+/web/static/css/main.css

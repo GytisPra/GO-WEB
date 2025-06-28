@@ -2,7 +2,7 @@ package models
 
 import (
 	"errors"
-	"log"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -13,15 +13,18 @@ type Account struct {
 	User                  User     `gorm:"foreignKey:UserID" json:"-"`
 	Type                  string   `gorm:"not null" json:"type"`
 	Provider              string   `gorm:"not null;uniqueIndex" json:"provider"`
-	ProviderAccountId     string   `gorm:"not null;uniqueIndex" json:"provider_account_id"`
-	RefreshToken          *string  `gorm:"" json:"refresh_token"`
-	AccessToken           *string  `gorm:"" json:"access_token"`
-	ExpiresAt             *float64 `gorm:"" json:"expires_at"`
-	TokenType             *string  `gorm:"" json:"token_type"`
-	Scope                 *string  `gorm:"" json:"scope"`
-	IdToken               *string  `gorm:"" json:"id_token"`
-	SessionState          *string  `gorm:"" json:"session_state"`
-	RefreshTokenExpiresIn *float64 `gorm:"" json:"refresh_token_Expires_in"`
+	ProviderAccountId     *string  `gorm:"uniqueIndex" json:"provider_account_id"`
+	RefreshToken          *string  `gorm:"" json:"refresh_token,omitempty"`
+	AccessToken           *string  `gorm:"" json:"access_token,omitempty"`
+	ExpiresAt             *float64 `gorm:"" json:"expires_at,omitempty"`
+	TokenType             *string  `gorm:"" json:"token_type,omitempty"`
+	Scope                 *string  `gorm:"" json:"scope,omitempty"`
+	IdToken               *string  `gorm:"" json:"id_token,omitempty"`
+	SessionState          *string  `gorm:"" json:"session_state,omitempty"`
+	RefreshTokenExpiresIn *float64 `gorm:"" json:"refresh_token_Expires_in,omitempty"`
+
+	// for local login only
+	PasswordHash *string `gorm:"" json:"password_hash,omitempty"`
 }
 
 func (a *Account) Validate() error {
@@ -34,24 +37,30 @@ func (a *Account) Validate() error {
 	if a.Provider == "" {
 		return errors.New("provider cannot be empty")
 	}
-	if a.ProviderAccountId == "" {
-		return errors.New("provider_account_id cannot be empty")
-	}
 	return nil
 }
 
 func CreateAccount(db *gorm.DB, account *Account) error {
 	if err := account.Validate(); err != nil {
-		return err
+		return fmt.Errorf("new account validation failed: %w", err)
 	}
-	result := db.Create(&account)
 
+	result := db.Where("user_id = ?", account.UserID).FirstOrCreate(account)
 	if result.Error != nil {
-		log.Println("Failed to insert data: ", result.Error)
-		return result.Error
+		return fmt.Errorf("failed to create new account: %w", result.Error)
 	}
-
-	log.Println("Created new account: ", account.ID, "for user: ", account.UserID)
 
 	return nil
+}
+
+func GetLocalAccountByUserID(userID string, db *gorm.DB) (*Account, error) {
+	var account Account
+
+	result := db.Where("user_id = ? AND provider = ? AND password_hash IS NOT NULL", userID, "local").First(&account)
+
+	if result.Error != nil {
+		return nil, fmt.Errorf("error finding account by user ID: %w", result.Error)
+	}
+
+	return &account, nil
 }

@@ -23,6 +23,8 @@ func (h *HomeHandler) ShowHome(w http.ResponseWriter, r *http.Request) {
 	tmplData := utils.TemplateData{
 		BuildTime:  utils.BuildTime,
 		IsLoggedIn: ok,
+		ShowHeader: true,
+		Page:       "home",
 		Data:       pageData,
 	}
 

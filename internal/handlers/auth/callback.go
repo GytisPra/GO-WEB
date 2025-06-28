@@ -125,8 +125,6 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	log.Println("User ID: ", user.ID)
-
 	var session *models.Session
 	session, err = h.sessionService.CreateSession(user.ID)
 	if err != nil {
@@ -154,7 +152,17 @@ func (h *CallbackHandler) DiscordCallbackHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	_, err = h.accountService.CreateAccount(user.ID, "oauth", "discord", discordID, &token.RefreshToken, &token.AccessToken, &expiresIn, &tokenType, &scopes, nil, nil, nil)
+	_, err = h.accountService.CreateAccount(
+		user.ID,
+		"oauth",
+		"discord",
+		&discordID,
+		&token.RefreshToken,
+		&token.AccessToken,
+		&expiresIn,
+		&tokenType,
+		&scopes,
+		nil, nil, nil, nil)
 	if err != nil {
 		utils.HandleError(w, fmt.Sprintf("Failed to create account: %v", err), http.StatusInternalServerError)
 		return

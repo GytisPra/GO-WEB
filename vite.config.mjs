@@ -8,15 +8,15 @@ export default defineConfig({
     emptyOutDir: false,
     rollupOptions: {
       input: {
-        main: path.resolve('./web/ts/main.ts'),
+        main: path.resolve('web/ts/main.ts'),
       },
       output: {
-        entryFileNames: 'js/bundle.js',
-        assetFileNames: 'css/tailwind.css',
+        entryFileNames: 'js/[name].js',
+        assetFileNames: 'css/[name][extname]',
       },
     },
   },
   css: {
-    postcss: './postcss.config.js',
+    postcss: path.resolve('./postcss.config.mjs'),
   },
 })

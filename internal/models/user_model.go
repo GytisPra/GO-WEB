@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -19,11 +20,10 @@ type User struct {
 }
 
 func CreateUser(db *gorm.DB, user *User) error {
-	result := db.Create(&user)
+	result := db.Where("id = ? AND email = ?", user.ID, user.Email).FirstOrCreate(user)
 
 	if result.Error != nil {
-		log.Println("Failed to insert data: ", result.Error)
-		return result.Error
+		return fmt.Errorf("failed to create user: %w", result.Error)
 	}
 
 	log.Println("Created new user: ", user.ID)
@@ -37,9 +37,29 @@ func GetUserById(db *gorm.DB, id string) (*User, error) {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("failed to find user by id: %w", err)
 	}
 
 	log.Println("Got user by ID: ", user.ID)
+	return &user, nil
+}
+
+func DeleteUserByID(db *gorm.DB, id string) error {
+	if err := db.Where("id = ?", id).Delete(&User{}).Error; err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	log.Println("Deleted user: ", id)
+	return nil
+}
+
+func GetUserByEmail(db *gorm.DB, email string) (*User, error) {
+	var user User
+
+	result := db.Where("email = ?", email).Find(&user)
+	if result.Error != nil {
+		return nil, fmt.Errorf("failed to find user by email: %w", result.Error)
+	}
+
 	return &user, nil
 }

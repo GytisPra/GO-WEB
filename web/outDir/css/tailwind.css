@@ -1,0 +1,1 @@
+@tailwind base;@tailwind components;@tailwind utilities;body{@apply bg-black text-white;}a{@apply hover:text-blue-300;}input,textarea,button{@apply outline-none focus:outline-white/25;}

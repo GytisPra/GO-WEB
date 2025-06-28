@@ -3,7 +3,6 @@ package auth
 import (
 	"net/http"
 	"time"
-	"web-app/internal/middleware"
 	"web-app/internal/services"
 )
 
@@ -18,12 +17,6 @@ func NewLogoutHandler(sessionService *services.SessionService) *LogoutHandler {
 func (h *LogoutHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
-	_, ok := middleware.FromContext(r.Context())
-	if !ok {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}

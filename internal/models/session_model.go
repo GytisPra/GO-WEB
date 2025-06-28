@@ -17,13 +17,13 @@ type Session struct {
 }
 
 func CreateSession(db *gorm.DB, session *Session) error {
-	result := db.Create(&session)
+	result := db.Where("user_id = ?", session.UserID).FirstOrCreate(&session)
 
 	if result.Error != nil {
-		return fmt.Errorf("failed to insert data: %w", result.Error)
+		return fmt.Errorf("failed to create session: %w", result.Error)
 	}
 
-	log.Println("Created new session: ", session.ID, "for user: ", session.UserID)
+	log.Println("created session: ", session.ID, "for user: ", session.UserID)
 
 	return nil
 }
@@ -44,8 +44,6 @@ func GetSessionByToken(sessionToken string, db *gorm.DB) (*Session, error) {
 	if err := db.Where("session_token = ?", sessionToken).First(&session).Error; err != nil {
 		return nil, err
 	}
-
-	log.Println("Got session: ", session.ID, "for user: ", session.UserID)
 
 	return &session, nil
 }

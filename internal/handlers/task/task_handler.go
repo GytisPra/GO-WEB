@@ -45,6 +45,8 @@ func (h *TaskHandler) ShowAllTasks(w http.ResponseWriter, r *http.Request) {
 	tmplData := utils.TemplateData{
 		BuildTime:  utils.BuildTime,
 		IsLoggedIn: true,
+		ShowHeader: true,
+		Page:       "tasks",
 		Data:       pageData,
 	}
 
@@ -68,6 +70,8 @@ func (h *TaskHandler) ShowCreateTaskForm(w http.ResponseWriter, r *http.Request)
 	tmplData := utils.TemplateData{
 		BuildTime:  utils.BuildTime,
 		IsLoggedIn: true,
+		ShowHeader: true,
+		Page:       "task-creation",
 		Data:       pageData,
 	}
 
@@ -76,7 +80,7 @@ func (h *TaskHandler) ShowCreateTaskForm(w http.ResponseWriter, r *http.Request)
 
 func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/task", http.StatusSeeOther)
+		http.Redirect(w, r, "/task", http.StatusMethodNotAllowed)
 		return
 	}
 

@@ -1,10 +1,13 @@
 package services
 
 import (
+	"errors"
 	"web-app/internal/models"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+
+	appErrors "web-app/pkg/errors"
 )
 
 type UserService struct {
@@ -16,24 +19,18 @@ func NewUserService(db *gorm.DB) *UserService {
 }
 
 func (s *UserService) CreateUser(name string, email string) (*models.User, error) {
-	var user *models.User
+	user := &models.User{
+		ID:    uuid.New().String(),
+		Name:  &name,
+		Email: &email,
+	}
 
-	result := s.db.Where("email = ?", email).First(&user)
-
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			user := &models.User{
-				ID:    uuid.New().String(),
-				Name:  &name,
-				Email: &email,
-			}
-			err := models.CreateUser(s.db, user)
-			if err != nil {
-				return nil, err
-			}
-			return user, nil
+	err := models.CreateUser(s.db, user)
+	if err != nil {
+		if errors.Is(err, appErrors.ErrUserAlreadyExits) {
+			return nil, appErrors.ErrUserAlreadyExits
 		}
-		return nil, result.Error
+		return nil, err
 	}
 
 	return user, nil
@@ -45,4 +42,21 @@ func (s *UserService) GetUserById(id string) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (s *UserService) GetUserByEmail(email string) (*models.User, error) {
+	user, err := models.GetUserByEmail(s.db, email)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (s *UserService) DeleteUserByID(id string) error {
+	err := models.DeleteUserByID(s.db, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

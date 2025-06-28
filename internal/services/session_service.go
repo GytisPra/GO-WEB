@@ -4,11 +4,15 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"time"
 	"web-app/internal/models"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+
+	appErrors "web-app/pkg/errors"
 )
 
 type SessionService struct {
@@ -20,28 +24,21 @@ func NewSessionService(db *gorm.DB) *SessionService {
 }
 
 func (s *SessionService) CreateSession(userID string) (*models.Session, error) {
-	var session *models.Session
+	token, err := generateSessionToken()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate session token: %w", err)
+	}
 
-	result := s.db.Where("user_id = ?", userID).First(&session)
+	log.Println("Generated session token:", token)
 
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			token, err := generateSessionToken()
-			if err != nil {
-				return nil, fmt.Errorf("failed to generate session token: %w", err)
-			}
-			session := &models.Session{
-				ID:           uuid.New().String(),
-				SessionToken: token,
-				Expires:      time.Now().Add(24 * time.Hour),
-				UserID:       userID,
-			}
-			if err := models.CreateSession(s.db, session); err != nil {
-				return nil, err
-			}
-			return session, nil
-		}
-		return nil, result.Error
+	session := &models.Session{
+		ID:           uuid.New().String(),
+		SessionToken: token,
+		Expires:      time.Now().Add(24 * time.Hour),
+		UserID:       userID,
+	}
+	if err := models.CreateSession(s.db, session); err != nil {
+		return nil, err
 	}
 
 	return session, nil
@@ -58,6 +55,24 @@ func (s *SessionService) GetSessionByToken(sessionToken string) (*models.Session
 	}
 
 	return session, nil
+}
+
+func (s *SessionService) LoginWithLocal(email, password string) (*models.Session, error) {
+	user, err := models.GetUserByEmail(s.db, email)
+	if err != nil {
+		return nil, appErrors.ErrInvalidCredentials
+	}
+
+	account, err := models.GetLocalAccountByUserID(user.ID, s.db)
+	if err != nil || account.PasswordHash == nil {
+		return nil, appErrors.ErrInvalidCredentials
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(*account.PasswordHash), []byte(password)); err != nil {
+		return nil, appErrors.ErrInvalidCredentials
+	}
+
+	return s.CreateSession(user.ID)
 }
 
 func (s *SessionService) IsUserLoggedIn(sessionToken string) (bool, *models.User, error) {

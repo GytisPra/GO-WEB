@@ -86,6 +86,7 @@ func main() {
 	callbackHandler := auth.NewCallbackHandler(userSerivce, accountService, sessionService)
 	logoutHandler := auth.NewLogoutHandler(sessionService)
 	loginHandler := auth.NewLoginHandler(sessionService)
+	registrationHandler := auth.NewRegistrationHandler(sessionService, userSerivce, accountService)
 
 	taskHandler := task.NewTaskHandler(taskService, sessionService)
 
@@ -94,12 +95,15 @@ func main() {
 	go sessionService.CleanupExpiredSessions()
 
 	// Don't use any auth middelware for these routes
-	Handle("/login", r, loginHandler.ShowLoginOptions)
-	Handle("/login/discord", r, loginHandler.LoginWithDiscord)
 	Handle("/callback/discord", r, callbackHandler.DiscordCallbackHandler)
 
 	// Use a softAuthMiddleware for these routes so that we can check if the user is logged in (accesible to public)
 	Handle("/", r, homeHandler.ShowHome, softAuthMiddleware)
+	Handle("/login", r, loginHandler.ShowLoginOptions, softAuthMiddleware)
+	Handle("/login/discord", r, loginHandler.LoginWithDiscord, softAuthMiddleware)
+	Handle("/login/local", r, loginHandler.LoginWithLocal, softAuthMiddleware)
+	Handle("/register/form", r, registrationHandler.ShowRegistrationForm, softAuthMiddleware)
+	Handle("/register/create-user", r, registrationHandler.Register, softAuthMiddleware)
 
 	// Protected routes only accesible when logged in
 	Handle("/logout", r, logoutHandler.Logout, authMiddleware)
