@@ -1,12 +1,13 @@
 .env
 .vscode
 /node_modules
-./cmd/go-web/tmp
-./cmd/go-web/main.exe
-./tmp
+
 
 # Ignore compiled JS from TS
 /web/static/js/*.js
 
 # Ignore compiled Tailwind CSS
 /web/static/css/main.css
+/cmd/go-web/tmp
+/cmd/go-web/main.exe
+/tmp
